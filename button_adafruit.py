@@ -1,4 +1,3 @@
-#motor wont turn off on auto
 from time import sleep
 from Adafruit_IO import Client, Feed
 from adafruit_motorkit import MotorKit
@@ -17,13 +16,18 @@ slider = aio.feeds('kay-dosage')
 pH_High_Point = aio.feeds ('kay-ph-high')
 pH_Low_Point = aio.feeds ('kay-ph-low')
 pump = MotorKit()
-
+pH_feed = aio.feeds ('kay-ph')
 while True:
     reading = pH_sensor.query("R", processing_delay = 1500)
     pH = reading.data
     pH = round(float(pH.decode("utf-8")),1)
+    print(pH)
+    aio.send(pH_feed.key, str(pH))
     toggle_value = aio.receive(toggle.key)
     mode = toggle_value.value
+    slider_value = aio.receive(slider.key)
+    volume = slider_value.value
+    
     if mode == "Manual":
         button_value = aio.receive(pump_button.key)
         result = button_value.value
@@ -38,8 +42,15 @@ while True:
         low_point_value = low_point.value 
         if pH < float(low_point_value):
             pump.motor1.throttle = 1.0
-            sleep(int(volume))
+            sleep(float(volume))
             pump.motor1.throttle = 0
- sleep(0.5)
+        high_point = aio.receive(pH_High_Point.key)
+        high_point_value = high_point.value
+        if pH > float(high_point_value):
+            pump.motor1.throttle = 1.0
+            sleep(float(volume))
+            pump.motor1.throttle = 0
+    sleep(0.5)
     
     
+
