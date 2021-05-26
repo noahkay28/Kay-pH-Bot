@@ -1,0 +1,26 @@
+In terminal:  sudo pip3 install adafruit-circuitpython-mlx90614
+
+from smbus2 import SMBus
+from mlx90614 import MLX90614
+from time import sleep
+
+
+
+while True:
+    bus = SMBus(1)
+    sensor1 = MLX90614(bus, address=0x5A)
+    sensor2 = MLX90614(bus, address=0x5B)
+    sensor3 = MLX90614(bus, address=0x5C)
+    temp1 = round(((sensor1.get_object_1()*9/5)+32),1)
+    temp2 = sensor2.get_object_1()
+    temp3 = sensor2.get_object_1()
+    
+    print('sensor 1 temp: ', temp1)
+    #print('sensor 2 temp: ',temp2)
+    #print('sensor 3 temp: ',temp3)
+    
+    bus.close()
+    
+    sleep(1)
+
+
